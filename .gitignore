@@ -1,0 +1,15 @@
+# Typescript
+
+node_modules/
+
+.idea/
+dist/
+*.swp
+out/
+.env.local
+npm-debug.log*
+*.js.map
+*.tsbuildinfo
+.env
+.next/
+.cache/
