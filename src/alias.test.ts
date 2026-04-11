@@ -35,6 +35,11 @@ describe('loadAliases', () => {
     const file = makeTempFile('[]');
     expect(loadAliases(file)).toEqual({});
   });
+
+  it('returns empty object when JSON is null', () => {
+    const file = makeTempFile('null');
+    expect(loadAliases(file)).toEqual({});
+  });
 });
 
 describe('saveAliases', () => {
@@ -44,6 +49,13 @@ describe('saveAliases', () => {
     saveAliases({ '@app': '/usr/app' }, file);
     const content = fs.readFileSync(file, 'utf-8');
     expect(JSON.parse(content)).toEqual({ '@app': '/usr/app' });
+  });
+
+  it('overwrites existing file content', () => {
+    const file = makeTempFile(JSON.stringify({ '@old': '/old/path' }));
+    saveAliases({ '@new': '/new/path' }, file);
+    const content = fs.readFileSync(file, 'utf-8');
+    expect(JSON.parse(content)).toEqual({ '@new': '/new/path' });
   });
 });
 
@@ -61,12 +73,21 @@ describe('resolveAlias', () => {
   it('resolves correct alias when multiple exist', () => {
     expect(resolveAlias('@lib/index.ts', aliases)).toBe('/home/user/lib/index.ts');
   });
+
+  it('returns original path when aliases is empty', () => {
+    expect(resolveAlias('@src/utils.ts', {})).toBe('@src/utils.ts');
+  });
 });
 
 describe('addAlias / removeAlias', () => {
   it('adds a new alias', () => {
     const result = addAlias('@new', '/new/path', {});
     expect(result).toEqual({ '@new': '/new/path' });
+  });
+
+  it('overwrites an existing alias with the same key', () => {
+    const result = addAlias('@src', '/updated/path', { '@src': '/old/path' });
+    expect(result).toEqual({ '@src': '/updated/path' });
   });
 
   it('removes an existing alias', () => {
