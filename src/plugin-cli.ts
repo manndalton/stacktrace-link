@@ -32,12 +32,14 @@ export function runLoad(filePath: string): void {
     printError('Please provide a plugin file path.');
     process.exit(1);
   }
+  const resolvedPath = path.resolve(filePath);
   try {
-    const plugin = loadPluginFromFile(path.resolve(filePath));
+    const plugin = loadPluginFromFile(resolvedPath);
     registerPlugin(plugin);
     printSuccess(`Plugin "${plugin.name}" loaded successfully.`);
   } catch (err: unknown) {
-    printError(`Failed to load plugin: ${(err as Error).message}`);
+    const message = (err as Error).message ?? String(err);
+    printError(`Failed to load plugin from "${resolvedPath}": ${message}`);
     process.exit(1);
   }
 }
