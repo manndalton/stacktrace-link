@@ -29,9 +29,14 @@ export function runAdd(alias: string | undefined, target: string | undefined): v
     process.exit(1);
   }
   const aliases = loadAliases();
+  const isUpdate = alias in aliases;
   const updated = addAlias(alias, target, aliases);
   saveAliases(updated);
-  printSuccess(`Alias added: ${alias}  →  ${target}`);
+  if (isUpdate) {
+    printSuccess(`Alias updated: ${alias}  →  ${target}`);
+  } else {
+    printSuccess(`Alias added: ${alias}  →  ${target}`);
+  }
 }
 
 export function runRemove(alias: string | undefined): void {
