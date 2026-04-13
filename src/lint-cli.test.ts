@@ -18,27 +18,29 @@ afterEach(() => {
   if (fs.existsSync(tmpFile)) fs.unlinkSync(tmpFile);
 });
 
+/** Captures all console.log output produced during a runLintCli call. */
+function captureOutput(args: string[]): string {
+  const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+  runLintCli(args);
+  const output = spy.mock.calls.map(c => c[0]).join('\n');
+  spy.mockRestore();
+  return output;
+}
+
 describe('runLintCli', () => {
   it('prints usage with --help', () => {
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    runLintCli(['--help']);
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('Usage'));
-    spy.mockRestore();
+    const output = captureOutput(['--help']);
+    expect(output).toContain('Usage');
   });
 
   it('lists rules with --rules', () => {
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    runLintCli(['--rules']);
-    expect(spy).toHaveBeenCalledWith(expect.stringContaining('lint rules'));
-    spy.mockRestore();
+    const output = captureOutput(['--rules']);
+    expect(output).toContain('lint rules');
   });
 
   it('lints a file and reports issues', () => {
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    runLintCli([tmpFile]);
-    const output = spy.mock.calls.map(c => c[0]).join('\n');
+    const output = captureOutput([tmpFile]);
     expect(output).toMatch(/issue/);
-    spy.mockRestore();
   });
 
   it('exits with code 1 when issues found', () => {
@@ -52,18 +54,14 @@ describe('runLintCli', () => {
   it('exits cleanly for clean trace', () => {
     const cleanFile = path.join(os.tmpdir(), `lint-clean-${Date.now()}.txt`);
     fs.writeFileSync(cleanFile, 'Error: oops\n    at myFunc (/project/src/app.ts:10:5)');
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    runLintCli([cleanFile]);
-    const output = spy.mock.calls.map(c => c[0]).join('\n');
+    const output = captureOutput([cleanFile]);
     expect(output).toMatch(/No issues/);
     fs.unlinkSync(cleanFile);
-    spy.mockRestore();
   });
 
   it('filters by severity', () => {
-    const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    runLintCli(['--severity=error', tmpFile]);
-    spy.mockRestore();
+    // Should not throw; output filtering is exercised without asserting specific content
+    expect(() => captureOutput(['--severity=error', tmpFile])).not.toThrow();
   });
 
   it('errors without file or --stdin', () => {
