@@ -58,6 +58,28 @@ export function runRemove(name: string): void {
   }
 }
 
+/**
+ * Displays detailed information about a single registered plugin by name.
+ * Exits with a non-zero code if the plugin is not found.
+ */
+export function runInfo(name: string): void {
+  if (!name) {
+    printError('Please provide a plugin name.');
+    process.exit(1);
+  }
+  const plugins = listPlugins();
+  const plugin = plugins.find((p) => p.name === name);
+  if (!plugin) {
+    printError(`Plugin "${name}" not found.`);
+    process.exit(1);
+  }
+  console.log(`Name:        ${plugin.name}`);
+  console.log(`Version:     ${plugin.version}`);
+  if (plugin.description) {
+    console.log(`Description: ${plugin.description}`);
+  }
+}
+
 export function runPluginCli(args: string[]): void {
   const [command, ...rest] = args;
   switch (command) {
@@ -69,6 +91,9 @@ export function runPluginCli(args: string[]): void {
       break;
     case 'remove':
       runRemove(rest[0]);
+      break;
+    case 'info':
+      runInfo(rest[0]);
       break;
     case 'help':
     default:
