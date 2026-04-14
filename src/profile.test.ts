@@ -45,6 +45,15 @@ describe('addProfile', () => {
     expect(profile.createdAt).toBeTruthy();
     expect(profile.updatedAt).toBeTruthy();
   });
+
+  it('overwrites an existing profile with the same name', () => {
+    addProfile('dup', { editor: 'vim' });
+    const updated = addProfile('dup', { editor: 'nano' });
+    expect(updated.editor).toBe('nano');
+    // Only one entry should exist under that name
+    const store = loadProfiles();
+    expect(Object.keys(store.profiles).filter(k => k === 'dup')).toHaveLength(1);
+  });
 });
 
 describe('removeProfile', () => {
