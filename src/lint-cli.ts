@@ -23,6 +23,18 @@ function formatIssue(issue: LintIssue): string {
   return `  ${icon} [${issue.ruleId}] Line ${issue.line}: ${issue.message}`;
 }
 
+/**
+ * Prints a summary line showing counts of errors and warnings.
+ */
+function printSummary(issues: LintIssue[]): void {
+  const errors = issues.filter(i => i.severity === 'error').length;
+  const warnings = issues.filter(i => i.severity === 'warning').length;
+  const parts: string[] = [];
+  if (errors > 0) parts.push(colorize(`${errors} error(s)`, 'red'));
+  if (warnings > 0) parts.push(colorize(`${warnings} warning(s)`, 'yellow'));
+  console.log(`  ${parts.join(', ')}`);
+}
+
 export function runLintCli(argv: string[]): void {
   if (argv.includes('-h') || argv.includes('--help')) {
     printUsage();
@@ -65,5 +77,6 @@ export function runLintCli(argv: string[]): void {
 
   console.log(colorize(`Found ${filtered.length} issue(s) in ${source}:`, 'yellow'));
   filtered.forEach(issue => console.log(formatIssue(issue)));
+  printSummary(filtered);
   process.exitCode = 1;
 }
